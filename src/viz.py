@@ -1,22 +1,21 @@
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt,os
+os.environ["TF_CPP_MIN_LOG_LEVEL"]="2"
 import numpy as np
 import pandas as pd
 import cv2
-from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, precision_score, recall_score, f1_score
+from sklearn.metrics import confusion_matrix, precision_score, recall_score, f1_score
 import tensorflow as tf
 from utils import dice_coef, dice_loss
 from train import load_dataset, tf_dataset
 
 # Load model with custom objects
 with tf.keras.utils.custom_object_scope({"dice_coef": dice_coef, "dice_loss": dice_loss}):
-    model = tf.keras.models.load_model("../results/model.keras")
+    model = tf.keras.models.load_model("results/model.keras")
 
-
-(train_x, train_y), (valid_x, valid_y), (test_x, test_y)=load_dataset('../data/')
-# test_x= tf_dataset(test_x, test_y, 16)
+(train_x, train_y), (valid_x, valid_y), (test_x, test_y) = load_dataset('data/')
 
 # Load last line from log.csv
-log_path = '../results/log.csv'  # Update path as necessary
+log_path = 'results/log.csv'  # Update path as necessary
 last_line = pd.read_csv(log_path).iloc[-1]
 
 true_dice = round(last_line['dice_coef'], 2)
@@ -51,7 +50,6 @@ for i in range(36):  # Assuming test_x and test_y contain test images and masks
 y_true = np.concatenate(y_true).astype(int)  # Ensure integer type for metrics
 y_pred = np.concatenate(y_pred).astype(int)
 
-
 # Ensure binary labels
 y_true = (y_true > 0).astype(int)  # Convert to binary (0 or 1)
 y_pred = (y_pred > 0).astype(int)  # Convert to binary (0 or 1)
@@ -63,27 +61,23 @@ f1 = f1_score(y_true, y_pred)
 
 conf_matrix = confusion_matrix(y_true, y_pred)
 
+# Plot all graphs in one figure
+fig, axs = plt.subplots(2, 2, figsize=(12, 10))
+
 # Plot Dice Coefficient and Loss
-plt.figure(figsize=(10, 5))
-plt.subplot(1, 2, 1)
-plt.bar(['Train Dice', 'Validation Dice'], [true_dice, predicted_dice], color=['blue', 'orange'])
-plt.title('Dice Coefficient')
-plt.ylabel('Value')
+axs[0, 0].bar(['Train Dice', 'Validation Dice'], [true_dice, predicted_dice], color=['blue', 'orange'])
+axs[0, 0].set_title('Dice Coefficient')
+axs[0, 0].set_ylabel('Value')
 
-plt.subplot(1, 2, 2)
-plt.bar(['Train Loss', 'Validation Loss'], [loss, val_loss], color=['blue', 'orange'])
-plt.title('Loss')
-plt.ylabel('Value')
-
-plt.tight_layout()
-plt.show()
+axs[0, 1].bar(['Train Loss', 'Validation Loss'], [loss, val_loss], color=['blue', 'orange'])
+axs[0, 1].set_title('Loss')
+axs[0, 1].set_ylabel('Value')
 
 # Plot Precision, Recall, and F1-Score
-plt.figure(figsize=(7, 5))
-metrics = ['Precision', 'Recall', 'F1 Score']
-values = [precision, recall, f1]
-plt.bar(metrics, values, color='green')
-plt.ylim(0, 1)
-plt.title('Classification Metrics')
-plt.ylabel('Value')
+axs[1, 0].bar(['Precision', 'Recall', 'F1 Score'], [precision, recall, f1], color='green')
+axs[1, 0].set_ylim(0, 1)
+axs[1, 0].set_title('Classification Metrics')
+axs[1, 0].set_ylabel('Value')
+
+plt.tight_layout()
 plt.show()

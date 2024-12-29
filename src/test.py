@@ -1,11 +1,13 @@
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt, os
+
+os.environ["TF_CPP_MIN_LOG_LEVEL"]="2"
 import cv2
 import numpy as np
 import tensorflow as tf
 from train import load_dataset, tf_dataset
 from utils import dice_coef, dice_loss
 
-(train_x, train_y), (valid_x, valid_y), (test_x, test_y)=load_dataset('../data/')
+(train_x, train_y), (valid_x, valid_y), (test_x, test_y)=load_dataset('data/')
 test_dataset= tf_dataset(test_x, test_y, 16)
 
 def segment(image, mask, color):
@@ -21,7 +23,7 @@ def segment(image, mask, color):
 
 # Load model with custom objects
 with tf.keras.utils.custom_object_scope({"dice_coef": dice_coef, "dice_loss": dice_loss}):
-    model = tf.keras.models.load_model("../results/model.keras")
+    model = tf.keras.models.load_model("results/model.keras")
 
 segmented_actual = []
 segmented_y_pred = []
