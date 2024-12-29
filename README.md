@@ -1,6 +1,10 @@
 # Brain Tumor Segmentation
 
 Brain tumor segmentation involves identifying and delineating tumor regions in brain images. This project uses low-quality images for segmentation.
+##DATA LINK
+```bash
+https://drive.google.com/file/d/1zfG1bwfa3Lp3KHgcg8R5SL8484L1OcDU/view?usp=sharing
+```
 
 ## Installation Instructions
 
